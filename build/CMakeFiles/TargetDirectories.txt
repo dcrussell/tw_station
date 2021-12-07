@@ -1,3 +1,0 @@
-/home/drussell/Projects/tw_station/build/CMakeFiles/rebuild_cache.dir
-/home/drussell/Projects/tw_station/build/CMakeFiles/edit_cache.dir
-/home/drussell/Projects/tw_station/build/CMakeFiles/TinyWeather.dir
