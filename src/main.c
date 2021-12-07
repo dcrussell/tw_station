@@ -4,17 +4,8 @@
 #include <avr/interrupt.h>
 #include <stdint.h>
 #include "command.h"
-//void blink(void) {
-//    PORTB = 0b00000001;          /* Turn on first LED bit/pin in PORTB */
-//    _delay_ms(1000);                                           /* wait */
-//
-//    PORTB = 0b00000000;          /* Turn off all B pins, including LED */
-//    _delay_ms(1000);                                           /* wait */
-//}
 
-
-
-
+//TODO: Update with actual main loop.
 int main(void) {
     comm_init();
     sei();
