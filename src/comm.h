@@ -12,8 +12,9 @@
 #endif
 
 #ifndef NUM_ATTEMPTS
-#define NUM_ATTEMPTS 3
+#define NUM_ATTEMPTS 1 //TODO: Change back
 #endif
+        
 
 void comm_init(void);
 /**

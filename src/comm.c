@@ -1,6 +1,7 @@
 //
 // Created by dalton on 8/19/21.
 //
+#include <stdint.h>
 #include <stdio.h>
 #include "comm.h"
 #include "serial.h"
@@ -12,15 +13,15 @@
 #define FRAME_TYPE_CTRL 'C'
 #define FRAME_TYPE_DATA 'D'
 
+
+//Control frame identifiers
 #define FRAME_ACK 0x01
-#define FRAME_NACK 0x02
-#define FRAME_PING 0x03
-#define FRAME_PING_REPLY 0x04
+#define FRAME_CRC_FAIL 0x02
+#define FRAME_OVERSIZE 0x03
+#define FRAME_INVALID 0x04
 
-static const char *nack_oversized_msg = "FRAME OVERFLOW";
-static const char *nack_crc_fail_msg = "CRC FAILED";
 
-static const uint8_t ack[7] = { FRAME_START, FRAME_TYPE_CTRL, 0x1, FRAME_ACK, 0x72, 0x26, FRAME_END };
+static const uint8_t ack[7] = { FRAME_START, FRAME_TYPE_CTRL, 0x1, FRAME_ACK, 0x21, 0x10, FRAME_END };
 
 
 static uint8_t frame_buffer[MAX_FRAME_SIZE];
@@ -56,13 +57,12 @@ static inline void copy_to_frame_buffer(uint8_t *src, size_t start, size_t n_byt
 }
 
 // Send a nack frame with a msg
-static void send_nack(const char *msg)
+static void send_nack(uint8_t nack_type)
 {
     frame_buffer[eStartField] = FRAME_START;
     frame_buffer[eTypeField] = FRAME_TYPE_CTRL;
-    frame_buffer[eLenField] = strlen(msg) + 1;
-    frame_buffer[ePayloadField] = FRAME_NACK;
-    strcpy((char *)&frame_buffer[ePayloadField+1], msg);
+    frame_buffer[eLenField] = 1;
+    frame_buffer[ePayloadField] = nack_type;
     uint16_t crc = crc16(&frame_buffer[ePayloadField], frame_buffer[eLenField]);
     frame_buffer[ePayloadField+frame_buffer[eLenField]] = crc & 0xff;
     frame_buffer[ePayloadField+frame_buffer[eLenField]+1] = (crc >> 8);
@@ -111,6 +111,7 @@ size_t comm_listen(uint8_t *buffer, size_t buffer_lengh) {
             case eStart: {
                 if (byte != FRAME_TYPE_DATA) {
                     frame_buffer_clear();
+                    send_nack(FRAME_INVALID);
                     return 0;
                 }
                 s = eType;
@@ -120,7 +121,7 @@ size_t comm_listen(uint8_t *buffer, size_t buffer_lengh) {
             case eType: {
                 if (byte > (MAX_FRAME_SIZE - 6))  {
                     frame_buffer_clear();
-                    send_nack(nack_oversized_msg);
+                    send_nack(FRAME_OVERSIZE);
                     return 0;
                 }
                 frame_buffer[n_bytes++] = (uint8_t) byte;
@@ -139,7 +140,7 @@ size_t comm_listen(uint8_t *buffer, size_t buffer_lengh) {
     // CRC check failed
     if (check_crc(n_bytes) != 0) {
         frame_buffer_clear();
-        send_nack(nack_crc_fail_msg);
+        send_nack(FRAME_CRC_FAIL);
         return 0;
     }
     size_t cpy_sz = frame_buffer[eLenField] > buffer_lengh ? buffer_lengh : frame_buffer[eLenField];
