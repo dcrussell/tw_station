@@ -1,7 +1,5 @@
-//
-// Created by dalton on 8/19/21.
-//
-
+// Module provides functions for sending and recieving data over USART using 
+// a custom transport protocol for (quasi)reliable delivery.
 #ifndef TWSTATION_COMM_H
 #define TWSTATION_COMM_H
 #include <stddef.h>
@@ -15,7 +13,10 @@
 #define NUM_ATTEMPTS 1 //TODO: Change back
 #endif
         
-
+/**
+ * @brief Initialize the communications. 
+ *
+ */
 void comm_init(void);
 /**
  * @brief Wait for a frame to be received and return its payload via the buffer pointer.
@@ -26,12 +27,18 @@ void comm_init(void);
 size_t comm_recv(uint8_t *buffer, size_t buffer_size);
 
 /**
+ * @brief Listen for incoming data.
+ * @param buffer The buffer 
+ *
+ */
+size_t comm_listen(uint8_t *buffer, size_t buffer_size);
+
+/**
  * @brief Send a buffer of data.
  * @param buffer The data be sent.
  * @param buffer_size The size of the data to be sent.
  */
 
-size_t comm_listen(uint8_t *buffer, size_t buffer_size);
 void comm_send(uint8_t *buffer, size_t nbytes);
 
 #endif //TWSTATION_COMM_H

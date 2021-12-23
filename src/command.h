@@ -1,7 +1,4 @@
-//
-// Created by dalton on 9/8/21.
-//
-
+// Command definitions
 #ifndef TWSTATION_COMMAND_H
 #define TWSTATION_COMMAND_H
 

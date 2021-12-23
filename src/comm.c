@@ -90,14 +90,12 @@ size_t comm_listen(uint8_t *buffer, size_t buffer_lengh) {
         return 0;
     }
 
-    //header
+    //Read in the header
     size_t n_bytes = 0;
     while (n_bytes < 3) {
-        int byte = -1;
-        while (byte == -1) {
-            byte = serial_read();
+        if (serial_available()) {
+            frame_buffer[n_bytes++] = serial_read();
         }
-        frame_buffer[n_bytes++] = byte;
     }
     if (frame_buffer[0] != FRAME_START) {
         frame_buffer_clear();
@@ -109,13 +107,11 @@ size_t comm_listen(uint8_t *buffer, size_t buffer_lengh) {
         send_control_frame(FRAME_OVERSIZE);
         return 0;
     }
-    // Rest of frame 
+    // Read in the rest of the frame 
     while (n_bytes < 6+frame_buffer[2]) {
-        int byte = -1;
-        while (byte == -1) {
-            byte = serial_read();
+        if (serial_available()) {
+            frame_buffer[n_bytes++] = serial_read();
         }
-        frame_buffer[n_bytes++] = byte;
     }
     
     if (frame_buffer[n_bytes-1] != FRAME_END) {
@@ -170,9 +166,17 @@ void comm_send(uint8_t *buffer, size_t nbytes) {
     while (attempts < NUM_ATTEMPTS) {
         serial_write_bytes(frame_buffer, frame_buffer[eLenField]+6);
         attempts++;
-        uint8_t bytes[4] = {0x00};
-        serial_read_bytes(bytes, 4);
-        serial_rx_clear(); // clear the remaining bytes from the buffer
+        uint8_t bytes[7] = {0x00};
+
+        //NOTE: Previously I was just reading in the first four bytes
+        //of the control frame and using rx_clear to clear the rest out but 
+        //it appears to not work like I thought. This led to a bug where 
+        //the next call to send would read 0x00 from serial and place it into 
+        //the local frame buffer. Because the listen function expects a start 
+        //byte it would automatically send a NACK before another command frame 
+        //was sent from the controller
+        //serial_rx_clear();
+        serial_read_bytes(bytes, 7);
         if (bytes[3] == FRAME_ACK) {
             break;
         }

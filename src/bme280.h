@@ -1,7 +1,5 @@
-//
-// Created by dalton on 9/10/21.
-//
-
+// BME280 sensor driver. Utilizes the Two-Wire (i2c) interface 
+// of the ATMega 328p 
 #ifndef TINYWEATHER_BME280_H
 #define TINYWEATHER_BME280_H
 #include <stdint.h>
@@ -79,6 +77,8 @@
 #define BME280_CALIB2_DATA      0xE1
 #define BME280_CALIB2_LEN       15
 
+
+// Reset value and measuring modes
 #define BME280_RESET_VAL        0xB6U
 #define BME280_MODE_SLEEP       0x00U
 #define BME280_MODE_FORCED      0x01U
@@ -91,28 +91,6 @@ typedef struct {
     uint32_t humidity;
 } Bme280tph_t;
 
-typedef struct {
-    uint16_t dig_t1;
-    int16_t dig_t2;
-    int16_t dig_t3;
-    uint16_t dig_p1;
-    int16_t dig_p2;
-    int16_t dig_p3;
-    int16_t dig_p4;
-    int16_t dig_p5;
-    int16_t dig_p6;
-    int16_t dig_p7;
-    int16_t dig_p8;
-    int16_t dig_p9;
-    uint8_t dig_h1;
-    int16_t dig_h2;
-    uint8_t dig_h3;
-    int16_t dig_h4;
-    int16_t dig_h5;
-    int8_t dig_h6;
-    int32_t t_fine;
-
-} Bme280CalibData_t;
 
 /**
  * @brief Initialize the sensor and start the i2c interface
